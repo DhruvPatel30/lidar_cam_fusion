@@ -1,0 +1,34 @@
+# Pixi
+.pixi/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ROS 2 / colcon
+install/
+build/
+log/
+*.bag
+*.db3
+*.yaml.bak
+
+# Data — KITTI raw files are large; track only metadata/scripts
+data/kitti/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
