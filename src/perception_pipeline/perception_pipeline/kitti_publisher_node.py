@@ -152,6 +152,7 @@ class KittiPublisherNode(Node):
                 "Falling back to wall-clock stamps — KITTI ground-truth alignment disabled."
             )
 
+
         # ── QoS — reliable, small queue (KITTI is playback, not a lossy sensor)
         qos = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
