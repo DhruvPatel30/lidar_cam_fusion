@@ -20,6 +20,7 @@ ultralytics = ">=8.0"
 build    = "colcon build --symlink-install --packages-select perception_pipeline"
 launch   = "ros2 launch perception_pipeline fusion_pipeline.launch.py"
 play-bag = "ros2 bag play $BAG_PATH --loop"
+foxglove  = "ros2 launch foxglove_bridge foxglove_bridge_launch.xml"
 verify-env       = "python scripts/verify_env.py"
 verify-publisher = "python scripts/verify_publisher.py"
 download-kitti = "python scripts/download_kitti.py"
@@ -38,6 +39,7 @@ ros-jazzy-message-filters = "*"
 ros-jazzy-visualization-msgs = "*"
 ros-jazzy-rosbag2-py = "*"
 ros-jazzy-rosbag2-storage-default-plugins = "*"
+ros-jazzy-foxglove-bridge = "*"
 
 [feature.jazzy.activation]
 scripts = ["scripts/activate_ros.sh"]
