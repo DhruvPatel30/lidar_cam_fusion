@@ -150,7 +150,7 @@ def download_sequence(date: str, seq: str, force: bool = False) -> Path:
         print("  Sequence data:")
         tmp = DATA_DIR / f"_seq_{date}_{seq}.zip"
         _download(_sequence_url(date, seq), tmp)
-        _extract(tmp, DATA_DIR / date)
+        _extract(tmp, DATA_DIR)
 
     # ── Validate ──────────────────────────────────────────────────────────────
     print("\n  Validating ...")
@@ -169,7 +169,7 @@ def download_sequence(date: str, seq: str, force: bool = False) -> Path:
 
     print(f"\n  \033[92mReady.\033[0m Set KITTI_SEQ to run the pipeline:")
     print(f"  export KITTI_SEQ={seq_dir}")
-    print(f"  pixi run verify2")
+    print(f"  pixi run verify-publisher")
     return seq_dir
 
 
