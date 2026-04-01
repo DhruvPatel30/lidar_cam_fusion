@@ -2,40 +2,48 @@
 name = "lidar_cam_fusion"
 version = "0.1.0"
 description = "LiDAR-Camera Fusion Pipeline using ROS 2 and KITTI dataset"
-channels = [
-    "robostack-humble",
-    "conda-forge",
-]
-platforms = ["osx-arm64", "linux-64"]
+channels = ["conda-forge"]          # fallback; overridden by feature.jazzy
+platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
 
-[tasks]
-build    = "colcon build --symlink-install --packages-select perception_pipeline"
-launch   = "ros2 launch perception_pipeline fusion_pipeline.launch.py"
-play-bag = "ros2 bag play $BAG_PATH --loop"
-
-[dependencies]
-# ROS 2 Humble — RoboStack requires Python 3.9 on Humble
-python = "3.9.*"
-ros-humble-ros-base = "*"
-ros-humble-sensor-msgs = "*"
-ros-humble-vision-msgs = "*"
-ros-humble-tf2-ros = "*"
-ros-humble-message-filters = "*"
-ros-humble-visualization-msgs = "*"
-ros-humble-rosbag2-py = "*"
-ros-humble-rosbag2-storage-default-plugins = "*"
+# ── Shared (distro-agnostic) ──────────────────────────────────────────────────
+[feature.base.dependencies]
 colcon-common-extensions = "*"
-
-# Core numerics (conda-forge, Python 3.9 compatible)
 numpy = ">=1.24,<2.0"
 pyyaml = "*"
 scipy = "*"
 
-[pypi-dependencies]
-# ML / vision stack — installed via pip (avoids opencv/cv-bridge conda conflicts)
+[feature.base.pypi-dependencies]
 opencv-python = ">=4.7"
-open3d = ">=0.17"
 ultralytics = ">=8.0"
 
-[activation]
+[feature.base.tasks]
+build    = "colcon build --symlink-install --packages-select perception_pipeline"
+launch   = "ros2 launch perception_pipeline fusion_pipeline.launch.py"
+play-bag = "ros2 bag play $BAG_PATH --loop"
+
+# ── ROS 2 Jazzy (Python 3.12, Ubuntu 24.04 / macOS) ──────────────────────────
+[feature.jazzy]
+channels = ["robostack-jazzy", "conda-forge"]
+
+[feature.jazzy.dependencies]
+python = "3.12.*"
+ros-jazzy-ros-base = "*"
+ros-jazzy-sensor-msgs = "*"
+ros-jazzy-vision-msgs = "*"
+ros-jazzy-tf2-ros = "*"
+ros-jazzy-message-filters = "*"
+ros-jazzy-visualization-msgs = "*"
+ros-jazzy-rosbag2-py = "*"
+ros-jazzy-rosbag2-storage-default-plugins = "*"
+
+[feature.jazzy.activation]
 scripts = ["scripts/activate_ros.sh"]
+
+# ── Open3D: conda-forge build — all platforms (PyPI wheels only go to Py 3.11)
+[feature.open3d.dependencies]
+open3d = ">=0.17"
+
+# ── Named environments ────────────────────────────────────────────────────────
+[environments]
+default = { features = ["base", "jazzy", "open3d"], solve-group = "jazzy" }
+jetson  = { features = ["base", "jazzy", "open3d"], solve-group = "jazzy" }
