@@ -16,7 +16,7 @@ KITTI Files on Disk
         ▼
 ┌─────────────────────┐   ┌──────────────────────┐
 │  camera_detector    │   │  lidar_processor     │   (planned)
-│  YOLOv8 2D boxes   │   │  Open3D clusters     │
+│  YOLOv8 2D boxes    │   │  Open3D clusters     │
 └─────────────────────┘   └──────────────────────┘
         │                          │
         └──────────┬───────────────┘
