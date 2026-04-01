@@ -20,7 +20,9 @@ ultralytics = ">=8.0"
 build    = "colcon build --symlink-install --packages-select perception_pipeline"
 launch   = "ros2 launch perception_pipeline fusion_pipeline.launch.py"
 play-bag = "ros2 bag play $BAG_PATH --loop"
-verify1  = "python scripts/verify_step1.py"
+verify1       = "python scripts/verify_step1.py"
+verify2       = "python scripts/verify_step2.py"
+download-kitti = "python scripts/download_kitti.py"
 
 # ── ROS 2 Jazzy (Python 3.12, Ubuntu 24.04 / macOS) ──────────────────────────
 [feature.jazzy]
