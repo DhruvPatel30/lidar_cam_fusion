@@ -144,7 +144,7 @@ class KittiPublisherNode(Node):
 
         # ── QoS — best-effort, small queue (mirrors live sensor drivers) ──────
         qos = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT,
+            reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_LAST,
             depth=5,
         )

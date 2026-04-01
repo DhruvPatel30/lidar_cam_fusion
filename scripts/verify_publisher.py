@@ -1,6 +1,6 @@
 """
 Step 2 verification — KITTI Publisher Node
-Run with: pixi run verify2
+Run with: pixi run verify-publisher
 
 Tests three things:
   A. Code-level: imports, class structure, conversion utilities
@@ -219,5 +219,5 @@ else:
     print(f"\033[92m{BOLD}ALL CHECKS PASSED{RESET} — Step 2 KITTI publisher is ready.")
     if not os.environ.get("KITTI_SEQ"):
         print(f"\n  {WARN[:-4]}NOTE{RESET}  To also validate your KITTI download, re-run with:")
-        print("       KITTI_SEQ=/path/to/sequence pixi run verify2")
+        print("       KITTI_SEQ=/path/to/sequence pixi run verify-publisher")
 print()
