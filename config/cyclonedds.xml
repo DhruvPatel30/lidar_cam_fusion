@@ -1,0 +1,14 @@
+<CycloneDDS>
+  <Domain>
+    <General>
+      <!-- Suppress thread-affinity errors on macOS (not supported on Darwin) -->
+      <Interfaces>
+        <NetworkInterface autodetermine="true" />
+      </Interfaces>
+    </General>
+    <Tracing>
+      <!-- Only log warnings and above — suppresses DDS system-level noise -->
+      <Verbosity>warning</Verbosity>
+    </Tracing>
+  </Domain>
+</CycloneDDS>

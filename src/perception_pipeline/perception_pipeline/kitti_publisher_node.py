@@ -142,7 +142,7 @@ class KittiPublisherNode(Node):
         self._n_frames = min(n_img, n_lid)
         self._frame_idx = 0
 
-        # ── QoS — best-effort, small queue (mirrors live sensor drivers) ──────
+        # ── QoS — reliable, small queue (KITTI is playback, not a lossy sensor)
         qos = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_LAST,
