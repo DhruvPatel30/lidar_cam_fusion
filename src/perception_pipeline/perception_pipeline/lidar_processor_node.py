@@ -46,14 +46,30 @@ from std_msgs.msg import Header
 def _pc2_to_numpy(msg: PointCloud2) -> np.ndarray:
     """Convert sensor_msgs/PointCloud2 → (N, 4) float32 numpy array [x,y,z,intensity].
 
-    Supports both packed (row_step > 0) and standard KITTI-style layouts.
+    Uses msg.fields to locate each channel by byte offset, so it works with
+    any field layout — not just the KITTI 4-float32 packing.
     """
-    raw = np.frombuffer(bytes(msg.data), dtype=np.float32)
-    # Each point is point_step bytes; we know KITTI packs 4 float32 per point
-    n_floats_per_point = msg.point_step // 4
-    raw = raw.reshape(-1, n_floats_per_point)
-    # x=col0, y=col1, z=col2, intensity=col3
-    return raw[:, :4].copy()
+    if msg.point_step == 0:
+        raise ValueError("PointCloud2 has point_step == 0")
+    if msg.point_step % 4 != 0:
+        raise ValueError(f"point_step {msg.point_step} is not a multiple of 4 bytes")
+
+    field_offsets = {f.name: f.offset for f in msg.fields}
+    required = {"x", "y", "z"}
+    missing = required - set(field_offsets)
+    if missing:
+        raise ValueError(f"PointCloud2 is missing required fields: {missing}")
+
+    n_points = msg.width * msg.height
+    stride = msg.point_step // 4  # floats per point
+    raw = np.frombuffer(bytes(msg.data), dtype=np.float32).reshape(n_points, stride)
+
+    result = np.zeros((n_points, 4), dtype=np.float32)
+    for col, name in enumerate(("x", "y", "z")):
+        result[:, col] = raw[:, field_offsets[name] // 4]
+    if "intensity" in field_offsets:
+        result[:, 3] = raw[:, field_offsets["intensity"] // 4]
+    return result
 
 
 def _numpy_to_pc2(points: np.ndarray, header: Header) -> PointCloud2:
@@ -265,7 +281,11 @@ class LidarProcessorNode(Node):
             self.get_logger().error(f"Failed to parse PointCloud2: {e}")
             return
 
-        result = self._preprocessor.process(points)
+        try:
+            result = self._preprocessor.process(points)
+        except Exception as e:
+            self.get_logger().error(f"Preprocessing failed on frame {self._frame_count}: {e}")
+            return
         s = result["stats"]
 
         # Publish filtered cloud
