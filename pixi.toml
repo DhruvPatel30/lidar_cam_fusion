@@ -23,6 +23,7 @@ play-bag = "ros2 bag play $BAG_PATH --loop"
 foxglove  = "ros2 launch foxglove_bridge foxglove_bridge_launch.xml"
 verify-env       = "python scripts/verify_env.py"
 verify-publisher = "python scripts/verify_publisher.py"
+verify3       = "python scripts/verify_step3.py"
 download-kitti = "python scripts/download_kitti.py"
 
 # ── ROS 2 Jazzy (Python 3.12, Ubuntu 24.04 / macOS) ──────────────────────────

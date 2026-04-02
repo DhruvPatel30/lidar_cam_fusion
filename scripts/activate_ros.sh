@@ -19,3 +19,9 @@ fi
 
 export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-0}"
 export RCUTILS_COLORIZED_OUTPUT=1
+
+# Suppress DDS thread-affinity errors on macOS
+CYCLONE_CFG="$WORKSPACE_DIR/config/cyclonedds.xml"
+if [[ -f "$CYCLONE_CFG" ]]; then
+    export CYCLONEDDS_URI="file://$CYCLONE_CFG"
+fi

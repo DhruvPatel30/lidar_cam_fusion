@@ -20,7 +20,7 @@ Usage:
       --ros-args -p sequence_path:=/path/to/sequence -p frame_rate:=10.0
 """
 
-import struct
+from datetime import datetime, timezone
 from pathlib import Path
 
 import cv2
@@ -28,6 +28,7 @@ import numpy as np
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+from rclpy.time import Time
 from sensor_msgs.msg import Image, PointCloud2, PointField
 from std_msgs.msg import Header
 
@@ -142,7 +143,17 @@ class KittiPublisherNode(Node):
         self._n_frames = min(n_img, n_lid)
         self._frame_idx = 0
 
-        # ── QoS — best-effort, small queue (mirrors live sensor drivers) ──────
+        # ── KITTI timestamps ──────────────────────────────────────────────────
+        ts_path = self._seq_path / camera_id / "timestamps.txt"
+        self._timestamps = self._load_timestamps(ts_path) if ts_path.exists() else None
+        if self._timestamps is None:
+            self.get_logger().warn(
+                f"No timestamps.txt found at {ts_path}. "
+                "Falling back to wall-clock stamps — KITTI ground-truth alignment disabled."
+            )
+
+
+        # ── QoS — reliable, small queue (KITTI is playback, not a lossy sensor)
         qos = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_LAST,
@@ -178,11 +189,25 @@ class KittiPublisherNode(Node):
                     "  2011_09_26/2011_09_26_drive_0001_sync/"
                 )
 
-    def _make_header(self, frame_id: str) -> Header:
-        header = Header()
-        header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = frame_id
-        return header
+    @staticmethod
+    def _load_timestamps(ts_path: Path) -> list[Time]:
+        """Parse a KITTI timestamps.txt into a list of rclpy.time.Time objects.
+
+        Each line has the format: 2011-09-26 13:02:25.820513000
+        """
+        times: list[Time] = []
+        with ts_path.open() as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                # Replace space with T so fromisoformat can parse it
+                dt = datetime.fromisoformat(line.replace(" ", "T"))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                ns = int(dt.timestamp() * 1e9)
+                times.append(Time(nanoseconds=ns))
+        return times
 
     def _publish_frame(self) -> None:
         if self._frame_idx >= self._n_frames:
@@ -196,7 +221,10 @@ class KittiPublisherNode(Node):
                 return
 
         idx = self._frame_idx
-        stamp = self.get_clock().now().to_msg()
+        if self._timestamps is not None and idx < len(self._timestamps):
+            stamp = self._timestamps[idx].to_msg()
+        else:
+            stamp = self.get_clock().now().to_msg()
 
         # Publish image
         try:
