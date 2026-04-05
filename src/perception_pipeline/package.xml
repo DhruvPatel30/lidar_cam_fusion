@@ -7,6 +7,22 @@
   <maintainer email="user@example.com">user</maintainer>
   <license>MIT</license>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <!-- C++ build dependencies -->
+  <build_depend>rclcpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>vision_msgs</build_depend>
+  <build_depend>libopencv</build_depend>
+  <build_depend>libonnxruntime</build_depend>
+
+  <!-- Runtime dependencies (C++) -->
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>libopencv</exec_depend>
+  <exec_depend>libonnxruntime</exec_depend>
+
+  <!-- Runtime dependencies (Python nodes) -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>vision_msgs</exec_depend>
@@ -21,6 +37,6 @@
   <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

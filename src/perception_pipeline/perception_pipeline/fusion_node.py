@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Fusion Node — Phase 6 (planned)
 ================================

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Camera Detector Node — Phase 4 (planned)
 =========================================

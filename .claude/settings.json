@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/dhruvpatel/Documents/Projects/lidar_cam_fusion/.pixi/envs/default -name fmt*Config.cmake)"
+    ]
+  }
+}

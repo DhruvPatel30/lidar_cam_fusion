@@ -17,6 +17,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
@@ -35,6 +36,14 @@ def generate_launch_description():
         "loop",
         default_value=os.environ.get("LOOP", "true"),
         description="Loop the sequence when it ends",
+    )
+    model_path_arg = DeclareLaunchArgument(
+        "model_path",
+        default_value=os.path.join(
+            get_package_share_directory("perception_pipeline"),
+            "models", "yolo11s.onnx",
+        ),
+        description="Absolute path to the YOLOv11s ONNX model (generate with: pixi run export-yolo)",
     )
 
     # ── KITTI publisher (Step 2) ───────────────────────────────────────────────
@@ -72,12 +81,28 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
+    # ── Camera detector (Step 4) ──────────────────────────────────────────────
+    camera_detector = Node(
+        package="perception_pipeline",
+        executable="camera_detector",
+        name="camera_detector",
+        parameters=[{
+            "model_path":          LaunchConfiguration("model_path"),
+            "conf_threshold":      0.5,
+            "nms_threshold":       0.45,
+            "publish_debug_image": True,
+        }],
+        output="screen",
+        emulate_tty=True,
+    )
+
     return LaunchDescription([
         seq_arg,
         rate_arg,
         loop_arg,
+        model_path_arg,
         LogInfo(msg="Starting LiDAR-Camera Fusion Pipeline (KITTI playback)"),
         kitti_publisher,
         lidar_processor,
-        # camera_detector node added in Step 4
+        camera_detector,
     ])
