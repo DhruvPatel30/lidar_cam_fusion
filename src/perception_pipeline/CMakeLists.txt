@@ -15,6 +15,11 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(vision_msgs REQUIRED)
+find_package(message_filters REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 # ── conda/pixi prefix — helps all find_package calls below locate packages ────
 if(DEFINED ENV{CONDA_PREFIX})
@@ -113,14 +118,39 @@ ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS perception_pipeline/kitti_publisher_node.py
   DESTINATION lib/${PROJECT_NAME} RENAME kitti_publisher)
-install(PROGRAMS perception_pipeline/fusion_node.py
-  DESTINATION lib/${PROJECT_NAME} RENAME fusion_node)
+
+# ── C++ library: LidarCameraProjector (no ROS / no Open3D dependency) ─────────
+add_library(lidar_camera_projector
+  src/lidar_camera_projector.cpp
+)
+target_include_directories(lidar_camera_projector PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(lidar_camera_projector Eigen3::Eigen)
+target_compile_features(lidar_camera_projector PUBLIC cxx_std_17)
+
+# ── C++ executable: fusion_node ────────────────────────────────────────────────
+add_executable(fusion_node
+  src/fusion_node.cpp
+)
+target_include_directories(fusion_node PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+ament_target_dependencies(fusion_node
+  rclcpp sensor_msgs vision_msgs message_filters ament_index_cpp visualization_msgs)
+target_link_libraries(fusion_node lidar_camera_projector yaml-cpp::yaml-cpp ${OpenCV_LIBS})
+if(APPLE)
+  get_target_property(_python_lib Python3::Python IMPORTED_LOCATION)
+  target_link_options(fusion_node PRIVATE "-Wl,-needed_library,${_python_lib}")
+endif()
 
 # ── Install C++ targets ────────────────────────────────────────────────────────
 install(TARGETS
   lidar_preprocessor
   lidar_processor
   camera_detector
+  lidar_camera_projector
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -134,6 +164,8 @@ install(CODE
     \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/camera_detector_node\"
     \"\${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/camera_detector\")"
 )
+install(TARGETS fusion_node
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/
   DESTINATION include

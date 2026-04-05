@@ -96,6 +96,24 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
+    pkg_share = get_package_share_directory("perception_pipeline")
+    calib_file = os.path.join(pkg_share, "config", "calibration.yaml")
+
+    # ── Fusion node (Step 6) ──────────────────────────────────────────────────
+    fusion_node = Node(
+        package="perception_pipeline",
+        executable="fusion_node",
+        name="fusion_node",
+        parameters=[{
+            "calibration_file":   calib_file,
+            "sync_slop":          0.1,
+            "publish_markers":    True,   # set False in production
+            "publish_debug_image": True,  # set False in production
+        }],
+        output="screen",
+        emulate_tty=True,
+    )
+
     return LaunchDescription([
         seq_arg,
         rate_arg,
@@ -105,4 +123,5 @@ def generate_launch_description():
         kitti_publisher,
         lidar_processor,
         camera_detector,
+        fusion_node,
     ])
